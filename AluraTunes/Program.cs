@@ -101,9 +101,95 @@ namespace AluraTunes
                 }
             }
 
-            //using (var )
+            Console.WriteLine();
 
-                Console.ReadLine();
+            using (var contexto = new AluraTunesEntities())
+            {
+                var textoBusca = "Led";
+
+                var query = from a in contexto.Artistas
+                            join alb in contexto.Albums
+                                on a.ArtistaId equals alb.ArtistaId
+                            where a.Nome.Contains(textoBusca)
+                            select new
+                            {
+                                nomeArtista = a.Nome,
+                                nomeAlbum = alb.Titulo
+                            };
+
+                foreach (var item in query)
+                {
+                    Console.WriteLine("{0}\t{1}", item.nomeArtista, item.nomeAlbum);
+                }
+
+                Console.WriteLine();
+
+                var query2 = contexto.Artistas.Where(a => a.Nome.Contains(textoBusca));
+
+                foreach (var artista in query2)
+                {
+                    Console.WriteLine("{0}\t{1}", artista.ArtistaId, artista.Nome);
+                }
+
+                Console.WriteLine();
+
+                var query3 = from alb in contexto.Albums
+                             where alb.Artista.Nome.Contains(textoBusca)
+                             select new
+                             {
+                                 nomeArtista = alb.Artista.Nome,
+                                 nomeAlbum = alb.Titulo
+                             };
+
+                foreach (var album in query3)
+                {
+                    Console.WriteLine("{0}\t{1}", album.nomeArtista, album.nomeAlbum);
+                }
+            }
+
+            Console.WriteLine();
+
+            using (var contexto = new AluraTunesEntities())
+            {
+                var buscaArtista = "Led Zeppelin";
+                var buscaAlbum = "Graffiti";
+
+                GetFaixas(contexto, buscaArtista, buscaAlbum);
+            }
+
+            Console.WriteLine();
+
+            using (var contexto = new AluraTunesEntities())
+            {
+                var query = from inf in contexto.ItemNotaFiscals
+                            where inf.Faixa.Album.Artista.Nome == "Led Zeppelin"
+                            select inf;
+
+                foreach (var inf in query)
+                {
+                    Console.WriteLine("{0}\t{1}\t{2}", inf.Faixa.Nome.PadRight(40), inf.Quantidade, inf.PrecoUnitario);
+                }
+            }
+            Console.ReadLine();
+        }
+
+        private static void GetFaixas(AluraTunesEntities contexto, string buscaArtista, string buscaAlbum)
+        {
+            var query = from f in contexto.Faixas
+                         where f.Album.Artista.Nome.Contains(buscaArtista)
+                         select f;
+
+            if (!string.IsNullOrEmpty(buscaAlbum))
+            {
+                query = query.Where(q => q.Album.Titulo.Contains(buscaAlbum));
+            }
+
+            query = query.OrderBy(q => q.Album.Titulo).ThenBy(q => q.Nome);
+
+            foreach (var faixa in query)
+            {
+                Console.WriteLine("{0}\t{1}", faixa.Album.Titulo.PadRight(40), faixa.Nome);
+            }
         }
     }
 
